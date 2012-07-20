@@ -1,0 +1,28 @@
+What is Raptor?
+
+Raptor is a software used to execute a scenario. A scenario contained several tasks with one or more goal (crawl something on web, do something (an "action") on the result then send it).
+
+For example: A scenario containing 3 Tasks. The first one has to get articles from a website, the second has to translate the content in english then finally the third one has to send the result by email.
+
+
+Technical informations:
+
+This project is developped in JAVA and used a lot of API (which will be listed soon) to satisfy all needs for tasks. 
+
+Versions:
+
+    Version 1: For the release 1.0, raptor is linked to a Mysql database only. It can do those tasks :
+            - Collect active scenarios and execute them if it's the time.
+
+	    - Extract one or more parts of a website.
+
+	    - Send email with the result of the last task
+
+	    - Translate the result given by the previous task
+
+	    - Post articles on Wordpress
+
+
+That's all for the moment... (I will add more information about it with a full documentation and install process). 
+
+Please contact me if you want to join the project.
