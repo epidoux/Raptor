@@ -1,0 +1,119 @@
+package com.raptor.properties;
+
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+
+/**
+ * Class containing all Constants for the APPLICATION
+ * @author erik
+ * @version 1.0
+ */
+public class Constants {
+
+	/**
+	 * Name of the application
+	 */
+	public static final String APP_NAME="Raptor Scenario Manager";
+	
+	/**
+	 * Version of the application
+	 */
+	public static final String APP_VERSION="1.0";
+	
+	/**
+	 * Fichier texte de proprietes du robot
+	 */
+	public static String PROPERTY_ROBOT_FILE="META-INF/robot.properties";
+		
+	/**
+	 * Key in properties file which give the smtp use by raptor to send mail
+	 */
+	public static final String EMAIL_SMTP = "robot.email.smtp";
+	
+	/**
+	 * Key in properties file which give the email use by raptor to send email
+	 */
+	public static final String EMAIL = "robot.email";
+	
+	/**
+	 * Key in properties file which precise if datas are stored in DB
+	 */
+	public static final String STORAGE_DB_ACTIVE="robot.storage.DB.active";
+	
+	/**
+	 * Key in properties: Host db
+	 */
+	public static final String STORAGE_DB_HOST="robot.storage.DB.host";
+
+	/**
+	 * Key in properties : Database name
+	 */
+	public static final String STORAGE_DB_DBNAME="robot.storage.DB.dbname";
+
+	/**
+	 * Key in properties : Database login
+	 */
+	public static final String STORAGE_DB_LOGIN="robot.storage.DB.login";
+	
+	/**
+	 * Key in properties : Database pass
+	 */
+	public static final String STORAGE_DB_PASS="robot.storage.DB.pass";
+	
+	/**
+	 * Code du login pour l'accès au mail du blog
+	 */
+	public static final String BLOG_LOGIN="robot.blog.login";
+	
+	/**
+	 * Internal regex needed to replace content
+	 */
+	public static final String INTERNAL_REGEX_CONTENT = "[content]";
+	
+	/**
+	 * Internal regex needed to replace source
+	 */
+	public static final String INTERNAL_REGEX_SOURCE = "[source]";
+	
+
+	/**
+	 * Internal regex needed to replace original content (not modified or translated)
+	 */
+	public static final String INTERNAL_REGEX_ORIGINAL_CONTENT = "[original_content]";
+	
+	
+	/**
+	 * US date format
+	 */
+	public static DateFormat DF_US = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	/**
+	 * FR date format
+	 */
+	public static DateFormat DF_FR = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+	
+	/**
+	 * Code for a string
+	 */
+	public static final String INTERNAL_CODE_TYPE_STRING = "string";
+	
+	/**
+	 * Code for an article
+	 */
+	public static final String INTERNAL_CODE_TYPE_ARTICLE = "article";
+	
+	/**
+	 * Code for a list of article
+	 */
+	public static final String INTERNAL_CODE_TYPE_LIST_ARTICLE = "list<article>";
+	
+	
+	
+	
+	/**
+	 * Constructor
+	 */
+	private Constants(){
+		
+	}
+	
+}
