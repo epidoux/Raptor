@@ -64,6 +64,14 @@ public abstract class Connection{
 	public abstract List<Condition<?>> getConditions(Task task) throws Exception;
 	
 	/**
+	 * Find the condition 
+	 * @param id the id of the condition
+	 * @return the condition
+	 * @throws Exception 
+	 */
+	public abstract Condition<?> findCondition(Integer id) throws Exception;
+	
+	/**
 	 * Get tags for a task
 	 * @param task the task
 	 * @return the list of tags

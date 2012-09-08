@@ -1,6 +1,7 @@
 package com.raptor.entities.tag;
 
 import com.raptor.entities.task.Task;
+import com.raptor.factories.TagFactory;
 
 
 /**
@@ -38,7 +39,8 @@ public class Tag {
 	 * Constructeur
 	 */
 	public Tag(){
-		
+
+		this.setType(TagFactory.TYPE_MOTHER);
 	}
 	
 	/**

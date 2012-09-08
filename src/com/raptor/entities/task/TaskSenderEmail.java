@@ -85,11 +85,6 @@ public class TaskSenderEmail extends TaskSender implements Serializable {
 			content = this.content.replace(Constants.INTERNAL_REGEX_SOURCE, source);
 		}
 		
-		//Trying to add original content too
-		if(this.keepOriginalContent){
-			String original = (String) this.findOriginalContent();
-			content = this.content.replace(Constants.INTERNAL_REGEX_ORIGINAL_CONTENT, original);
-		}
 		
 		Boolean result = false;
 		if(filled != null && filled != "" && content !="")result =EmailService.getInstance().sendMailSMTP(this.emails, this.object, content, false);

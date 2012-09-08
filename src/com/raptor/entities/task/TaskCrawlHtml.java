@@ -13,6 +13,7 @@ import java.util.List;
 import com.raptor.entities.condition.Condition;
 import com.raptor.entities.core.Article;
 import com.raptor.entities.tag.Tag;
+import com.raptor.factories.TagFactory;
 import com.raptor.properties.Log;
 import com.raptor.services.core.HtmlExtractorService;
 
@@ -33,9 +34,19 @@ public class TaskCrawlHtml extends TaskCrawl implements Serializable {
 	
 	
 	/**
-	 * Is there multi pages to crawl? if yes linked a condition
+	 * Is there multi pages to crawl? if yes there is a regex as CSS (name .class #id ...)
 	 */
-	protected Condition<?> condition;
+	protected String multipageRegex;
+	
+	/**
+	 * Multipages limit
+	 */
+	protected Integer multipageLimit;
+	
+	/**
+	 * Is there a readmore link on each articles? if yes there is a regex as CSS (name .class #id ...)
+	 */
+	protected String readmoreRegex;
 	
 	/**
 	 * Constructeur
@@ -60,6 +71,34 @@ public class TaskCrawlHtml extends TaskCrawl implements Serializable {
 	public void setTags(List<Tag> tags) {
 		this.tags = tags;
 	}
+	
+	
+
+	public String getMultipageRegex() {
+		return multipageRegex;
+	}
+
+	public void setMultipageRegex(String multipageRegex) {
+		this.multipageRegex = multipageRegex;
+	}
+
+	public String getReadmoreRegex() {
+		return readmoreRegex;
+	}
+
+	public void setReadmoreRegex(String readmoreRegex) {
+		this.readmoreRegex = readmoreRegex;
+	}
+	
+	
+
+	public Integer getMultipageLimit() {
+		return multipageLimit;
+	}
+
+	public void setMultipageLimit(Integer multipageLimit) {
+		this.multipageLimit = multipageLimit;
+	}
 
 	@Override
 	public Object execute(Object filled) throws Exception {
@@ -75,11 +114,13 @@ public class TaskCrawlHtml extends TaskCrawl implements Serializable {
 		while ((line=br.readLine())!=null){
 			content+=line+"\n";
 		}
+		
+		
 		List<Article> articles = HtmlExtractorService.getInstance().parse(this.getLink(), content,this);
 		//Conditions on the content of an article
 		List<Condition<?>> conditions =this.getConditions();
-		int i = 0;
 		List<Article> arts = this.getArticles();
+		int i = arts.size();
 		List<Integer> listToAdd = new ArrayList<Integer>();
 		for(Article article : articles){
 			//we check that a task doesn't contain the article yet
@@ -87,7 +128,7 @@ public class TaskCrawlHtml extends TaskCrawl implements Serializable {
 			for(Article a : arts){
 				if(article.getTitle().equals(a.getTitle()) && article.getContent().equals(a.getContent())){
 						refus = true;
-						Log.getInstance().debug("Refuse "+article+" because it's already in "+this, null);
+						Log.getInstance().debug("Refuse ("+article.getId()+")"+article.getTitle()+" because it's already in "+this, null);
 						
 				}
 			}
@@ -101,24 +142,24 @@ public class TaskCrawlHtml extends TaskCrawl implements Serializable {
 				if(!decline){
 					this.getArticles().add(article);
 					listToAdd.add(i);
+					i++;
 				}
 				else{
-					Log.getInstance().debug("Refuse "+article+" because of conditions on task ", null);
+					Log.getInstance().debug("Refuse ("+article.getId()+")"+article.getTitle()+" because of conditions on task ", null);
 				}
 			}
 			
-			i++;
 		}
-		//restruct a valid list of articles
+		//restruct a list of new articles
 		List<Article> validArticles = new ArrayList<Article>();
 		for(int j : listToAdd){
 			validArticles.add(this.getArticles().get(j));
 		}
-		this.setArticles(validArticles);
 		
-		Log.getInstance().info("Get "+this.getArticles().size()+" article(s)");
+		Log.getInstance().info("Get "+validArticles.size()+" new article(s)");
 		
-		return this.getArticles();
+		//Return only the new crawled articles
+		return validArticles;
 	}
 
 	   @Override

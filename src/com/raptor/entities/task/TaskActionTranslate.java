@@ -43,8 +43,10 @@ public class TaskActionTranslate extends TaskAction implements Serializable {
 	@Override
 	public Object execute(Object filled) throws Exception {
 		//detect language here if needed... for further version
-		this.original_content=filled;
-		this.needed_content = TranslatorService.getInstance().translate(""+filled, this.original_language, this.needed_language);
+		String cont = "";
+		if(this.getKeepOriginalContent())cont +=""+filled+" // TRANSLATED CONTENT // ";
+		cont += TranslatorService.getInstance().translate(""+filled, this.original_language, this.needed_language);
+		this.needed_content=cont;
 		return this.needed_content;
 	}
 	
@@ -92,10 +94,5 @@ public void setNeeded_content(Object needed_content) {
    }
 
 
-
-@Override
-public String getOriginalContentType() {
-	return Constants.INTERNAL_CODE_TYPE_STRING;
-}
 
 }

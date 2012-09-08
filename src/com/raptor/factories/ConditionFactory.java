@@ -42,6 +42,7 @@ public class ConditionFactory {
 	 */
 	public static final String TYPE_INTEGER="INTEGER";
 	
+	
 	public static final String EGAL = "=";
 	
 	public static final String DIFFERENT="!=";
@@ -162,9 +163,9 @@ public class ConditionFactory {
 	 */
 	public String findSigne(String signe){
 		String resu=EGAL;
-		if(this.mapSigne.containsValue(signe)){
+		if(this.getMapSignes().containsValue(signe)){
 			
-			for(String val :this.mapSigne.values()){
+			for(String val :this.getMapSignes().values()){
 				if(val.equals(signe)){
 					resu=signe;
 				}

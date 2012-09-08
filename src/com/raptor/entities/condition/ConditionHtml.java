@@ -42,7 +42,7 @@ public class ConditionHtml extends Condition<String> {
 			else if(condition.getPositionType().equals(ConditionFactory.POSITION_URL)){
 				//url;
 				if(condition.getPositionRegex().contains(":pos:")){
-					str = condition.getPositionRegex().replace(":pos:", "(.?)*");
+					str = condition.getPositionRegex().replace(":pos:", "(.*)");
 					//extract :pos: in the url
 
 					resultat = this.evaluate(str, (String)condition.value, article.getLink(),condition);

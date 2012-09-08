@@ -187,12 +187,23 @@ public abstract class Condition<T> {
 					resultat =Integer.parseInt(resu)>=Integer.parseInt(valeur);
 				}
 			}
-			catch(ClassCastException e){
+			catch(Exception e){
 				resultat=false;
 				
 			}
 		}
 		return resultat;
+	}
+	
+	/**
+	 * Test if a link is excluded or not
+	 * @param url the string url (complete!)
+	 * @return true or false
+	 */
+	public Boolean isExcludedUrl(String url){
+		Article article = new Article();
+		article.setLink(url);
+		return this.isExclude(article, this);
 	}
 
 	@Override
