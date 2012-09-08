@@ -103,4 +103,12 @@ public class RobotProperties {
 		return INSTANCE.propRobot.getProperty(Constants.STORAGE_DB_PASS);
 	}
 	
+	/**
+	 * Return if the service translator is active
+	 * @return true or false
+	 */
+	public Boolean isServiceTranslatorActive(){
+		return "true".equals(INSTANCE.propRobot.getProperty(Constants.SERVICE_TRANSLATOR))?true:false;
+	}
+	
 }

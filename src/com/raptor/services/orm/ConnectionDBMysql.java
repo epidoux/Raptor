@@ -253,6 +253,15 @@ public class ConnectionDBMysql extends ConnectionDB{
 					TaskCrawlHtml task = (TaskCrawlHtml) t;
 					task.setTags(tags);
 					
+					//is there a multipage
+					task.setMultipageRegex(rs.getString("crawl_multipages"));
+					
+					//multipage limit
+					task.setMultipageLimit(rs.getInt("crawl_multipageLimit"));
+					
+					//is there a readmore
+					task.setReadmoreRegex(rs.getString("crawl_readmore"));
+					
 				}
 				
 				
@@ -260,7 +269,6 @@ public class ConnectionDBMysql extends ConnectionDB{
 				if(t instanceof TaskSender){
 					TaskSender task = (TaskSender) t;
 					task.setAddSource(rs.getInt("sender_add_source")==1?true:false);
-					task.setKeepOriginalContent(rs.getInt("sender_keep_original_content")==1?true:false);
 				}
 				
 				//get specific info for TaskSenderEmail
@@ -289,7 +297,9 @@ public class ConnectionDBMysql extends ConnectionDB{
 				//Get specific info for TaskAction
 				if(t instanceof TaskAction){
 					TaskAction task = (TaskAction)t;
-					
+					Boolean bol = false;
+					if(rs.getInt("action_keep_original_content")==1)bol=true;
+					task.setKeepOriginalContent(bol);
 					//Get specific info for TaskActionTranslate
 					if(t instanceof TaskActionTranslate){
 						TaskActionTranslate taskT = (TaskActionTranslate) t;
@@ -323,18 +333,18 @@ public class ConnectionDBMysql extends ConnectionDB{
 				condition.setTask(task);
 				condition.setId(rs2.getLong("id"));
 				if(ConditionFactory.TYPE_STRING.equals(rs2.getString("type"))){
-					((Condition<String>)condition).setValue(rs2.getString("valeur"));
+					((Condition<String>)condition).setValue(rs2.getString("value"));
 				}
 				else if(ConditionFactory.TYPE_INTEGER.equals(rs2.getString("type"))){
-					((Condition<Integer>)condition).setValue(Integer.parseInt(rs2.getString("valeur")));
+					((Condition<Integer>)condition).setValue(Integer.parseInt(rs2.getString("value")));
 				}
 				else if(ConditionFactory.TYPE_DATE.equals(rs2.getString("type"))){
 					Calendar cal = Calendar.getInstance();
-					cal.setTime(Constants.DF_US.parse(rs2.getString("valeur")));
+					cal.setTime(Constants.DF_US.parse(rs2.getString("value")));
 					((Condition<Calendar>)condition).setValue(cal);
 				}
 				else if(ConditionFactory.TYPE_HTML.equals(rs2.getString("type"))){
-					((Condition<String>)condition).setValue(rs2.getString("valeur"));
+					((Condition<String>)condition).setValue(rs2.getString("value"));
 				}
 				
 				conditions.add(condition);
@@ -342,6 +352,44 @@ public class ConnectionDBMysql extends ConnectionDB{
 			}
 			rs2.close();
 			return conditions;
+		}
+		
+		/**
+		 * Find the condition 
+		 * @param id the id of the condition
+		 * @return the condition
+		 * @throws Exception 
+		 */
+		@Override
+		@SuppressWarnings("unchecked")
+		public Condition<?> findCondition(Integer id) throws Exception{
+			ResultSet rs2 = this.exec("SELECT * FROM `condition` WHERE id="+id);
+			
+			rs2.next();
+			Condition<?> condition = ConditionFactory.getInstance().create(rs2.getString("type"));
+			condition.setPositionRegex(rs2.getString("positionRegex"));
+			condition.setPositionType(rs2.getString("positionType"));
+			condition.setSigne(rs2.getString("signe"));
+			condition.setTask(null);
+			condition.setId(rs2.getLong("id"));
+			if(ConditionFactory.TYPE_STRING.equals(rs2.getString("type"))){
+				((Condition<String>)condition).setValue(rs2.getString("valeur"));
+			}
+			else if(ConditionFactory.TYPE_INTEGER.equals(rs2.getString("type"))){
+				((Condition<Integer>)condition).setValue(Integer.parseInt(rs2.getString("valeur")));
+			}
+			else if(ConditionFactory.TYPE_DATE.equals(rs2.getString("type"))){
+				Calendar cal = Calendar.getInstance();
+				cal.setTime(Constants.DF_US.parse(rs2.getString("valeur")));
+				((Condition<Calendar>)condition).setValue(cal);
+			}
+			else if(ConditionFactory.TYPE_HTML.equals(rs2.getString("type"))){
+				((Condition<String>)condition).setValue(rs2.getString("valeur"));
+			}
+			
+			rs2.close();
+			return condition;
+			
 		}
 		
 		/**
@@ -354,7 +402,7 @@ public class ConnectionDBMysql extends ConnectionDB{
 			ResultSet rs = this.exec("SELECT * FROM tag WHERE taskid = "+task.getId());
 			List<Tag> tags = new ArrayList<Tag>();
 			while(rs.next()){
-				Tag tag = TagFactory.getInstance().findBalise(rs.getString("type"));
+				Tag tag = TagFactory.getInstance().findTag(rs.getString("type"));
 				tag.setName(rs.getString("name"));
 				tag.setId(rs.getLong("id"));
 				tag.setClasse(rs.getString("classe"));

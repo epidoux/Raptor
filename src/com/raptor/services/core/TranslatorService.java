@@ -1,9 +1,22 @@
 package com.raptor.services.core;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.http.client.utils.URIUtils;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+
+import com.raptor.properties.Log;
+import com.raptor.properties.RobotProperties;
 
 
 /**
@@ -32,6 +45,7 @@ public class TranslatorService {
 	public static final String NORWEGIAN = "no";
 	public static final String DANISH = "da";
 
+	private Map<String,String> translationCodes;
 	
 	private TranslatorService(){
 	
@@ -41,6 +55,14 @@ public class TranslatorService {
 	public static TranslatorService getInstance(){
 		if(INSTANCE==null){
 			INSTANCE = new TranslatorService();
+			try {
+				if(!RobotProperties.getInstance().isServiceTranslatorActive()){
+
+					  Log.getInstance().info("The translator service is not active!");
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 		return INSTANCE;
 	}
@@ -54,42 +76,107 @@ public class TranslatorService {
    * @return the translated string
  * @throws UnsupportedEncodingException 
    */
-  public String translate(String str, String current_language, String needed_language ) throws UnsupportedEncodingException{
-	  String result = str;
-	  if(current_language!=null && needed_language!=null){
-		  //Encode the string for the URL
-		  //We have to split the string to every point "." because the traduction is ended there (smart huh?)
-		  String[] sentences = str.split("\\.");
-		  if(sentences.length==0){
-			  sentences = new String[1];
-			  sentences[0] = str;
-		  }
-		  
-		  for(int i = 0; i<sentences.length;i++){
-			  String sentence = sentences[i];
-			  sentence = URLEncoder.encode(sentence,"UTF-8");
-			  String link ="http://translate.google.com/translate_a/t?client=t&text="+sentence+"&hl="+current_language+"&sl="+current_language+"&tl="+needed_language+"&ie=UTF-8&oe=UTF-8&multires=1&otf=1&pc=1&trs=1&ssel=3&tsel=6&sc=1";
-			  
-			  String resu = HtmlExtractorService.getInstance().getStringFromUrl(link);
-			 //System.out.println("Returning string array = "+resu);
-			  String[] tab = resu.split(",\"\",\"\"]]");
-			  String[] tab2 = tab[0].split("\",\"");
-			  //clean the string
-			  String clean = tab2[0].substring(4, tab2[0].length());
-			  result = clean;
-			  sentences[i] = result;
-		  }
-		  
-		  //reconstruct all the sentences
-		  result = "";
-		  for(String sentence : sentences){
-			  result += sentence+".";
-		  }
-	  }
+  public String translate(String str, String current_language, String needed_language ) throws Exception{
+		String result = str;
+	  if(RobotProperties.getInstance().isServiceTranslatorActive()){
+		if(current_language!=null && needed_language!=null){
+			//Check if the str string contains html tags or not
+			Pattern pat = Pattern.compile("<(.*?)>");
+			Matcher mat = pat.matcher(str);
+			if(mat.find()){
+				Document doc = Jsoup.parse(str);
+				Elements elems = doc.getAllElements();
+				
+				for(Element elem : elems){
+					String st = elem.text();
+					//Encode the string for the URL
+					//We have to split the string to every point "." because the google translation is ended there 
+					String[] sentences = st.split("\\.");
+					if(sentences.length==0){
+						sentences = new String[1];
+						sentences[0] = st;
+					}
+			
+					for(int i = 0; i<sentences.length;i++){
+						try{
+							String sentence = sentences[i];
+							if(!"".equals(sentence)){
+								//sentence = URLEncoder.encode(sentence,"UTF-8");
+								String link ="http://ets.freetranslation.com/";
+								
+								String dir = this.findTranslationCode(current_language,needed_language);
+								result = HtmlExtractorService.getInstance().getStringTranslationFromUrl(link, dir,sentence);
+								//System.out.println("Returning string array = "+resu);
+								//String[] tab = resu.split(",\"\",\"\"]]");
+								//String[] tab2 = tab[0].split("\",\"");
+								//clean the string
+								//String clean = tab2[0].substring(4, tab2[0].length());
+								//result = URLDecoder.decode(clean,"UTF-8");
+								sentences[i] = result;
+							}
+							else sentences[i] = "";
+						}
+						catch(Exception e){
+							Log.getInstance().debug("[TranslatorService] Error while getting a translation ", e);
+						}
+					}
+			
+					//reconstruct all the sentences
+					result = "";
+					for(String sentence : sentences){
+						result += sentence+".";
+					}
+					elem.text(result);
+				}
+				
+				result = doc.outerHtml();
+			}
+			else{
+				//simple string
+				//Encode the string for the URL
+				//We have to split the string to every point "." because the traduction is ended there (smart huh?)
+				String[] sentences = str.split("\\.");
+				if(sentences.length==0){
+					sentences = new String[1];
+					sentences[0] = str;
+				}
 
+				String dir = this.findTranslationCode(current_language,needed_language);
+				for(int i = 0; i<sentences.length;i++){
+					String sentence = sentences[i];
+					if(!"".equals(sentence)){
+						//sentence = URLEncoder.encode(sentence,"UTF-8");
+						String link ="http://ets.freetranslation.com/";
+						result = HtmlExtractorService.getInstance().getStringTranslationFromUrl(link, dir,sentence);
+						//System.out.println("Returning string array = "+resu);
+						sentences[i] = result;
+					}
+					else sentences[i] = "";
+				}
+		
+				//reconstruct all the sentences
+				result = "";
+				for(String sentence : sentences){
+					result += sentence+".";
+				}
+			}
+		}
+
+		Log.getInstance().debug("[TranslatorService] Translating "+str+" from "+current_language+" to "+needed_language, null);
+	  }
+	  else{
+		  Log.getInstance().debug("[TranslatorService] This service is not active!", null);
+	  }
 	  return result;
   }
-  /**
+  private String findTranslationCode(String current_language,
+		String needed_language) {
+	
+	return this.getTranslationCodes().get(current_language+"-"+needed_language);
+}
+
+
+/**
    * Encode a string for an URL
    * @param input string
    * @return encoded string
@@ -117,6 +204,20 @@ public class TranslatorService {
           return true;
       return " %$&+,/:;=?@<>#%".indexOf(ch) >= 0;
   }
+
+
+public Map<String,String> getTranslationCodes() {
+	if(translationCodes == null){
+		this.translationCodes= new HashMap<String,String>();
+		this.translationCodes.put(ENGLISH+"-"+FRENCH, "524289");
+	}
+	return translationCodes;
+}
+
+
+public void setTranslationCodes(Map<String,String> translationCodes) {
+	this.translationCodes = translationCodes;
+}
 
 
 }

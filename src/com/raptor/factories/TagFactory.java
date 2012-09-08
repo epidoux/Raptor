@@ -16,27 +16,34 @@ import com.raptor.entities.tag.TagTitle;
 public class TagFactory {
 
 	/**
-	 * Instance of balise factory
+	 * Instance of tag factory
 	 */
 	private static TagFactory INSTANCE;
 	
 	/**
-	 * Key of the balise type content
+	 * Key of the tag type content
+	 * Included or not in a MOTHER tag 
+	 * Correspond to the content of the article
 	 */
 	public static final String TYPE_CONTENT = "CONTENT";
 	
 	/**
-	 * Key of the balise type Date
+	 * Key of the tag type Date
+	 * Included or not in a MOTHER tag 
+	 * Correspond to the date of the article
 	 */
 	public static final String TYPE_DATE = "DATE";
 	
 	/**
-	 * Key of the balise type Title
+	 * Key of the tag type Title
+	 * Included or not in a MOTHER tag 
+	 * Correspond to the title of the article
 	 */
 	public static final String TYPE_TITLE = "TITLE";
 	
 	/**
-	 * Key of the balise type MOTHER
+	 * Key of the tag type MOTHER
+	 * Create an article for the content
 	 */
 	public static final String TYPE_MOTHER="MOTHER";
 		
@@ -61,11 +68,11 @@ public class TagFactory {
 	}
 	
 	/**
-	 * Find the balise which the related key is given
-	 * @param key the key of the balise
-	 * @return the balise
+	 * Find the tag which the related key is given
+	 * @param key the key of the tag
+	 * @return the tag
 	 */
-	public Tag findBalise(String key){
+	public Tag findTag(String key){
 		Tag b =null;
 		if(TYPE_DATE.equals(key)){
 			b= new TagDate();
@@ -81,12 +88,12 @@ public class TagFactory {
 	}
 	
 	/**
-	 * Find the balise in a list with its type match with the code given
-	 * @param list the list of balises
+	 * Find the tag in a list with its type match with the code given
+	 * @param list the list of tags
 	 * @param key the key given
-	 * @return balise 
+	 * @return tag 
 	 */
-	public Tag findBaliseInList(List<Tag> list, String key){
+	public Tag findTagInList(List<Tag> list, String key){
 		Tag resu = null;
 		for(Tag b : list){
 			if(TYPE_DATE.equals(key)){
@@ -119,9 +126,9 @@ public class TagFactory {
 	}
 	
 	/**
-	 * Retrieve the key of the balise
-	 * @param the balise
-	 * @return the type of the balise
+	 * Retrieve the key of the tag
+	 * @param the tag
+	 * @return the type of the tag
 	 */
 	public String findType(Tag b){
 		String resu=null;

@@ -1,8 +1,12 @@
 package com.raptor.services.core;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.htmlparser.Node;
 import org.htmlparser.NodeFilter;
@@ -13,18 +17,28 @@ import org.htmlparser.filters.TagNameFilter;
 import org.htmlparser.util.NodeList;
 import org.htmlparser.util.ParserException;
 import org.htmlparser.util.SimpleNodeIterator;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 
+import com.raptor.entities.condition.Condition;
 import com.raptor.entities.core.Article;
 import com.raptor.entities.tag.Tag;
 import com.raptor.entities.tag.TagContent;
 import com.raptor.entities.tag.TagTitle;
 import com.raptor.entities.task.TaskCrawlHtml;
 import com.raptor.factories.TagFactory;
+import com.raptor.properties.Log;
 
 
 public class HtmlExtractorService {
 
 	private static HtmlExtractorService INSTANCE;
+	
+	private Integer current_loop=0;
+	
+	private Boolean crawl_it = true;
 	
 	private HtmlExtractorService(){
 	
@@ -36,76 +50,173 @@ public class HtmlExtractorService {
 			INSTANCE = new HtmlExtractorService();
 		}
 		return INSTANCE;
-	}
-    
+	}    
 
+	/**
+	 * Parse a weblink 
+	 * @param link the link to parse
+	 * @param content the content
+	 * @param task the task linked
+	 * @return the list of articles
+	 * @throws Exception
+	 */
 	public List<Article> parse(String link, String content,TaskCrawlHtml task) throws Exception {
+		Log.getInstance().debug("[HtmlExtractorService] Parsing "+link+" for the "+task,null);
+		List<Article> articles = new ArrayList<Article>();
 		
-		NodeList nodes = this.constructNodes(link,task);
+		//There is a readmore link (change the var link to the readmore)
+		if(task.getReadmoreRegex()!=null){
+			/*FilterBean fb = new FilterBean();
+			fb.setURL(link);
+			String html = fb.getNodes().toHtml();
+			Pattern pattern = Pattern.compile(task.getReadmoreRegex());
+			Matcher matcher = pattern.matcher(html);
+			while(matcher.find()){
+				String url = matcher.group(1);
+				NodeList nodes = this.constructNodes(url, task);
+				articles.addAll(this.extractArticles(nodes, task, url));
+			}*/
+			Document doc = Jsoup.connect(link).timeout(999999).get();
+			Elements elems = doc.select(task.getReadmoreRegex());
+			
+			Log.getInstance().debug("[HtmlExtractorService] Found "+elems.size()+" 'read more' elements ",null);
+			for(Element a : elems){
+				String url = a.attr("href");
+				if(!url.isEmpty() && url!=null){
+					//we've got the url of the entire article
+					articles.addAll(this.extractArticles(url, task));
+				}
+				if(!crawl_it)break;
+			}
+		}
+		else{
+		
+			//No readmore link, everything is here
+			//NodeList nodes = this.constructNodes(link,task);
+			
+			articles.addAll(this.extractArticles(link, task));
+		}
+		
+		//There is a multipage system (recursive function)
+		if(task.getMultipageRegex()!=null && !task.getMultipageRegex().isEmpty()){
+
+			INSTANCE.current_loop++;
+			if(INSTANCE.current_loop<task.getMultipageLimit() && crawl_it){
+				Log.getInstance().debug("[HtmlExtractorService] There is a multipages system, let's another turn! ",null);
+				Document doc = Jsoup.connect(link).timeout(999999).get();
+				Element el = doc.select(task.getMultipageRegex()).first();
+				try{
+					articles.addAll(this.parse(el.attr("href"), content, task));
+				}
+				catch(NullPointerException e){
+					//avoid exception for the final lap
+				}
+			}
+			else{
+				if(!crawl_it) Log.getInstance().info("[HtmlExtractorService] End of new articles");
+				else Log.getInstance().info("[HtmlExtractorService] Limit of multipages exceeded");
+			}
+			
+		}
+
+		Log.getInstance().debug("[HtmlExtractorService] Returning "+articles.size()+" articles ",null);
+		return articles;
+	}
+	
+	/**
+	 * Prepare a css Query
+	 * @param Tag the tag
+	 * @return the string css query
+	 */
+	private String prepareCssQuery(Tag tag){
+		String cssQuery = "";
+		if(tag.getName()!=null && !tag.getName().isEmpty()){
+			cssQuery+=tag.getName();
+		}
+		if(tag.getClasse()!=null && !tag.getClasse().isEmpty()){
+			cssQuery+="."+tag.getClasse();
+		}
+		if(tag.getIdentifiant()!=null && !tag.getIdentifiant().isEmpty()){
+			cssQuery+="#"+tag.getIdentifiant();
+		}
+		
+		return cssQuery;
+	}
+	
+	/**
+	 * Extract articles from an url
+	 * @param url the url
+	 * @param task the task
+	 * @return the list of articles
+	 * @throws IOException 
+	 */
+	private List<Article> extractArticles(String url,TaskCrawlHtml task) throws IOException{
+		Log.getInstance().debug("[HtmlExtractorService] Extracting articles from "+url,null);
 		List<Article> articles = new ArrayList<Article>();
 		if(task.getTags()!=null && !task.getTags().isEmpty() && task.getTags().size()>1){
 			//There are tags other than MotherTag as Title tag, content tag ...
+
+			Document doc = Jsoup.connect(url).timeout(999999).get();
+			Tag motherTag = (Tag)TagFactory.getInstance().findTagInList(task.getTags(), TagFactory.TYPE_MOTHER);
+			String cssQuery = this.prepareCssQuery(motherTag);
+			Elements elements = doc.select(cssQuery);
 			
-			SimpleNodeIterator cpt =nodes.elements();
-			//For each node matching an article
-			while(cpt.hasMoreNodes()){
-				Node node = cpt.nextNode();
-				
+			for(Element element : elements){
 				Article a = new Article();
-				a.setLink(link);
+				Boolean addArticle = true;
+				a.setLink(url);
 				a.setDateExecution(Calendar.getInstance());
 				a.setTask(task);
 				//TitleTag?
-				TagTitle bt= (TagTitle) TagFactory.getInstance().findBaliseInList(task.getTags(), TagFactory.TYPE_TITLE);
+				TagTitle bt= (TagTitle) TagFactory.getInstance().findTagInList(task.getTags(), TagFactory.TYPE_TITLE);
 				if(bt!=null){
-					 
-					 Node nTitre = this.findNode(node.getChildren(), bt);
-					 String title = "unknown";//default
-					 if(nTitre!=null){
-						 title = nTitre.toPlainTextString();
-					 }
-					 a.setTitle(title);
+					 Element el = element.select(this.prepareCssQuery(bt)).first();
+					 if(el!=null)a.setTitle(el.text());
+					 else addArticle = false;
 				}
-				
 				//Content type tag?
-				TagContent bc= (TagContent) TagFactory.getInstance().findBaliseInList(task.getTags(), TagFactory.TYPE_CONTENT);
+				TagContent bc= (TagContent) TagFactory.getInstance().findTagInList(task.getTags(), TagFactory.TYPE_CONTENT);
 				if(bc!=null){
-					 Node nContent = this.findNode(node.getChildren(), bc);
-					 String contents = node.toHtml();//par defaut
-					 if(nContent!=null){
-						 contents = nContent.toHtml();
-					 }
-					 a.setContent(contents);
-				}
-				else{
-					a.setContent(node.toHtml());
+					Element el = element.select(this.prepareCssQuery(bc)).first();
+					if(el!=null)a.setContent(el.outerHtml());
+					else addArticle = false;
 				}
 				
 				//Check the uniqueness of the current list of articles
-				if(!articles.contains(a)){
+				if(!task.getArticles().contains(a)){
 					//Check to the title and the content uniqueness
 					Boolean unique = true;
-					for(Article art : articles){
-						if(art.getTitle().equals(a.getTitle()) && art.getContent().equals(a.getContent())){
+					for(Article art : task.getArticles()){
+						if(art.getLink().equals(a.getLink())){
 							unique = false;
+							crawl_it = false;
 						}
 					}
 					//if it's unique article, add it
-					if(unique)articles.add(a);
+					if(unique && addArticle)articles.add(a);
 				}
+				else{
+					//stop crawling, you already have next ones
+					crawl_it = false;
+				}
+				
+				if(!crawl_it) break;
 			}
+			
+			
+			
 		}
 		else{
 			//no more tags, transform it in html
 			Article a =new Article();
-			a.setLink(link);
+			a.setLink(url);
 			a.setDateExecution(Calendar.getInstance());
 			a.setTask(task);
-			a.setTitle(link);
-			a.setContent(nodes.toHtml());
+			Document doc = Jsoup.connect(url).timeout(999999).get();
+			a.setTitle(doc.getElementsByTag("title").text());
+			a.setContent(doc.html());
 			articles.add(a);
 		}
-
 		
 		return articles;
 	}
@@ -117,15 +228,15 @@ public class HtmlExtractorService {
 	 * @return the list of nodes
 	 * @throws ParserException 
 	 */
-	private NodeList constructNodes(String url,TaskCrawlHtml task) throws ParserException{
+/*	private NodeList constructNodes(String url,TaskCrawlHtml task) throws ParserException{
 		FilterBean bean = new FilterBean ();
 
 		if(task.getTags()!=null && !task.getTags().isEmpty()){
 			Tag mother = null;
 			try{
-				mother = TagFactory.getInstance().findBaliseInList(task.getTags(), TagFactory.TYPE_MOTHER);
+				mother = TagFactory.getInstance().findTagInList(task.getTags(), TagFactory.TYPE_MOTHER);
 			}
-			catch(Exception e){throw new ParserException("It may exists a mother tag to parse datas");}
+			catch(Exception e){throw new ParserException("It must exists a mother tag to parse datas");}
 			
 			List<NodeFilter> liste_filtres = new ArrayList<NodeFilter>();
 			//Adding filters needed to get data
@@ -143,10 +254,10 @@ public class HtmlExtractorService {
 	        bean.setFilters(array0);
 		}
 
-        bean.setURL(task.getLink());
+        bean.setURL(url);
         return bean.getNodes();
        
-	}
+	}*/
 	
 	/**
 	 * Retrieve the node needed
@@ -154,12 +265,12 @@ public class HtmlExtractorService {
 	 * @param balise the balise to retrieve
 	 * @return the node needed
 	 */
-	public Node findNode(NodeList node,Tag b){
-		//Ordering balises on name
+	/*public Node findNode(NodeList node,Tag b){
+		//Ordering tags on name
 		NodeFilter filtre = new TagNameFilter(b.getName());
 		
 		NodeList noeuds =node.extractAllNodesThatMatch(filtre);
-		//Ordering balises on attributes 
+		//Ordering tags on attributes 
 		if(b.getClasse()!=null && !"".equals(b.getClasse())){
 			filtre = new org.htmlparser.filters.HasAttributeFilter("class",b.getClasse());
 			noeuds = noeuds.extractAllNodesThatMatch(filtre);
@@ -174,20 +285,27 @@ public class HtmlExtractorService {
 		else{
 			return null;
 		}
-	}
+	}*/
 	
 	/**
-	 * Retrieve something from the link given
+	 * Retrieve something from the link given as string (not html!!!)
 	 * @param link the link to parse
+	 * @param languages English%2FFrench
+	 * @param msg the string to post
 	 * @return the string given in response
+	 * @throws IOException 
 	 */
-	public String getStringFromUrl(String link){
-		 StringBean sb = new StringBean ();
-	     sb.setLinks (false);
-	     sb.setReplaceNonBreakingSpaces (true);
-	     sb.setCollapse (true);
-	     sb.setURL (link); // the HTTP is performed here
-	     String s = sb.getStrings ();
-	     return s;
+	public String getStringTranslationFromUrl(String link,String languages, String msg) throws IOException{
+		//&dsttext=&
+	   // mode=html&username=&password=&Submit=FREE+Translation&charset=UTF-8&template=textareaResponse-ETS.asp&lwSrc=&lwDest=&lwPair=&Project=&transType=ETS&language=English%2FFrench&targetServer=ETS&srctext=this+is+a+test&srcLang=English&dstLang=English%2FFrench%3A%3A%3A%3Acore%3A%3AETS&submitbut=Translate&respSupplier=FREETRANSLATION&resptext=
+				
+		Document doc = Jsoup.connect(link)
+				  .data("sequence","core","mode","html","Submit","FREE+Translation","charset","UTF-8","template","textareaResponse-ETS.asp","transType","ETS","language","English/French","targetServer","ETS","srctext",msg,"submitbut","Translate","respSupplier","FREETRANSLATION")
+				  .userAgent("Mozilla")
+				  .cookie("auth", "token")
+				  .timeout(999999)
+				  .post();
+
+		return doc.text();
 	}
 }

@@ -61,6 +61,11 @@ public class Constants {
 	public static final String STORAGE_DB_PASS="robot.storage.DB.pass";
 	
 	/**
+	 * key in properties : Service translator
+	 */
+	public static final String SERVICE_TRANSLATOR = "robot.service.translator";
+	
+	/**
 	 * Code du login pour l'accès au mail du blog
 	 */
 	public static final String BLOG_LOGIN="robot.blog.login";

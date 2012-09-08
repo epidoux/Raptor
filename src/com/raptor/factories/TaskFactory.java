@@ -3,6 +3,7 @@ package com.raptor.factories;
 import com.raptor.entities.task.Task;
 import com.raptor.entities.task.TaskCrawlHtml;
 import com.raptor.entities.task.TaskCrawlRss;
+import com.raptor.entities.task.TaskSenderBlogWordpress;
 import com.raptor.entities.task.TaskSenderEmail;
 import com.raptor.entities.task.TaskActionTranslate;
 import com.raptor.entities.task.TaskActionTranslateArticles;
@@ -34,6 +35,11 @@ public class TaskFactory {
 	 * Key task sender email
 	 */
 	public static final String TASK_SENDER_EMAIL="SENDER_EMAIL";
+
+	/**
+	 * Key task sender blog wordpress
+	 */
+	public static final String TASK_SENDER_BLOG_WORDPRESS="SENDER_BLOG_WORDPRESS";
 	
 	/**
 	 * Key task translate articles
@@ -91,6 +97,10 @@ public class TaskFactory {
 		else if(TASK_TRANSLATE_ARTICLE.equals(code)){
 			b = new TaskActionTranslateArticles();
 			b.setType(TASK_TRANSLATE_ARTICLE);
+		}
+		else if(TASK_SENDER_BLOG_WORDPRESS.equals(code)){
+			b = new TaskSenderBlogWordpress();
+			b.setType(TASK_SENDER_BLOG_WORDPRESS);
 		}
 		return b;
 	}
