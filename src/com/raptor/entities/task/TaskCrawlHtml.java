@@ -13,15 +13,28 @@ import java.util.List;
 import com.raptor.entities.condition.Condition;
 import com.raptor.entities.core.Article;
 import com.raptor.entities.tag.Tag;
-import com.raptor.factories.TagFactory;
 import com.raptor.properties.Log;
 import com.raptor.services.core.HtmlExtractorService;
 
 /**
  * This class represents a task having a crawl pn a website to do in a scenario
- * @author erik
- * @version 1.0
  * type = crawl_html
+ * @author Eric Pidoux
+ * @version 1.0
+ *  This file is part of Raptor.
+ *  Raptor is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  Raptor is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with Raptor.  If not, see <http://www.gnu.org/licenses/>
+ *
  */
 public class TaskCrawlHtml extends TaskCrawl implements Serializable {
    /** Default value included to remove warning. Remove or modify at will. **/

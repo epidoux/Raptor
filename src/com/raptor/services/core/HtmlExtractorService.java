@@ -1,28 +1,13 @@
 package com.raptor.services.core;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import org.htmlparser.Node;
-import org.htmlparser.NodeFilter;
-import org.htmlparser.beans.FilterBean;
-import org.htmlparser.beans.StringBean;
-import org.htmlparser.filters.HasAttributeFilter;
-import org.htmlparser.filters.TagNameFilter;
-import org.htmlparser.util.NodeList;
-import org.htmlparser.util.ParserException;
-import org.htmlparser.util.SimpleNodeIterator;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-
-import com.raptor.entities.condition.Condition;
 import com.raptor.entities.core.Article;
 import com.raptor.entities.tag.Tag;
 import com.raptor.entities.tag.TagContent;
@@ -31,7 +16,26 @@ import com.raptor.entities.task.TaskCrawlHtml;
 import com.raptor.factories.TagFactory;
 import com.raptor.properties.Log;
 
-
+/**
+ * Service which extract html content
+ * @author Eric Pidoux
+ * @version 1.0
+ *  This file is part of Raptor.
+ *  Raptor is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  Raptor is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with Raptor.  If not, see <http://www.gnu.org/licenses/>
+ *
+ *
+ */
 public class HtmlExtractorService {
 
 	private static HtmlExtractorService INSTANCE;
