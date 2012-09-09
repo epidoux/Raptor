@@ -48,13 +48,13 @@ DOCUMENTATION OF RAPTOR DATABASE
 		- "crawl_readmore" : TEXT : Option for CRAWL type task : define if there is a readmore button on the page to access to the entire article (the field must be filled with a css navigation regex to the button ex: .pagecontent #readmore a[href])
 		- "sender_email_emails" : TEXT : Option for SENDER_EMAIL type task : define the emails to send the result (split character used is ,)
 		- "sender_email_object" : VARCHAR : Option for SENDER_EMAIL type task : define the object of the email
-		- "sender_email_content" : VARCHAR : Option for SENDER_EMAIL type task : define a fixed content before the result (put [content] to paste result here) 
+		- "sender_email_content" : VARCHAR : Option for SENDER_EMAIL type task : define a fixed content before the result (put [content] to paste result here, [source] to paste the source of the article, [original_content] to paste the original content) 
 		- "sender_blog_link" : VARCHAR : Option for SENDER_BLOG : define the link of the blog 
 		- "sender_blog_login" : VARCHAR : Option for SENDER_BLOG : define the login of the blog 
 		- "sender_blog_pass" : VARCHAR : Option for SENDER_BLOG : define the pass of the blog 
 		- "sender_blog_email" : VARCHAR : Option for SENDER_BLOG : define the email of the blog user 
 		- "action_keep_original_content" : INT : Option for Action type task : define if the content before doing action must be saved and send to the next task 
-		- "sender_add_source" : INT : define if the source must be added (if it was a crawl)
+		- "sender_add_source" : INT : define if the source of the crawl must be added to the result (each articles for example)
 		- "action_translate_language_original" : VARCHAR : define the original language code (en/fr/...)
 		- "action_translate_language_needed" : VARCHAR : define the needed language code (en/fr/...)
 		

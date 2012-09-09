@@ -60,14 +60,14 @@ public class TaskSenderBlogWordpress extends TaskSenderBlog implements Serializa
 		emails.add(this.blogEmail);
 		for(Article article : articles){
 
+			String content = article.getContent();
 			
 			//check if we have to add the source
-			//if(this.getAddSource()) content += " Source : "+this.blogLink;
+			if(this.getAddSource()) content += " Source : "+this.findSource();
 			
-			//EmailService.getInstance().sendMailSMTP(emails, article.getTitle(), content, false);
-			Wordpress wp = new Wordpress("admin", "N)dQuZl**)H7", this.blogLink+"/xmlrpc.php");
+			Wordpress wp = new Wordpress(this.blogLogin, this.blogPass, this.blogLink+"/xmlrpc.php");
 		    Page post = new Page();
-		    post.setDescription(StringEscapeUtils.escapeHtml(article.getContent()));
+		    post.setDescription(StringEscapeUtils.escapeHtml(content));
 		    post.setTitle(StringEscapeUtils.escapeHtml(article.getTitle()));
 		    wp.newPost(post,false);
 		}

@@ -27,7 +27,7 @@ public abstract class TaskSender extends Task implements Serializable {
 	
    /** Default value included to remove warning. Remove or modify at will. **/
    private static final long serialVersionUID = 1L;
-   
+
    /**
     * Add source link to the content send (use regex if its email)
     */
