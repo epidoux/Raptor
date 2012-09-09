@@ -1,30 +1,64 @@
-What is Raptor?
 
-Raptor is a software used to execute a scenario. A scenario contained several tasks with one or more goal (crawl something on web, do something (an "action") on the result then send it).
+1) What is Raptor?
 
-For example: A scenario containing 3 Tasks. The first one has to get articles from a website, the second has to translate the content in english then finally the third one has to send the result by email.
-
-
-Technical informations:
-
-This project is developped in JAVA and used a lot of API (which will be listed soon) to satisfy all needs for tasks. 
-
-Versions:
-
-    Version 1: For the release 1.0, raptor is linked to a Mysql database only. It can do those tasks :
-            - Collect active scenarios and execute them if it's the time.
-
-	    - Extract one or more parts of a website.
-
-	    - Send email with the result of the last task
-
-	    - Translate the result given by the previous task
-
-	    - Post articles on Wordpress
+	Raptor is a free software used to execute a scenario. A scenario contained several tasks with one or more goal (crawl something on web, do something (an "action") on the result then send it).
+	
+	For example: A scenario containing 3 Tasks. The first one has to get articles from a website, the second has to translate the content in english then finally the third one has to send the result by email.
 
 
+2) Technical informations:
+
+	This project is developed in JAVA and used a lot of API to satisfy all needs for tasks. 
+	
+	I will describe here the inheritance of classes for Task (There is 3 type of classes for the moment matching to the 3 possible actions you can do
+for the moment:
+		- CRAWL: get a content somewhere (html on website, rss feed,...) and transform it into text or List<articles>
+		- ACTION : the action to perform on the result of the crawl task (translation,...)
+		- SEND : Send the result somewhere (email, wordpress,...)
+		
+	Versions:
+	
+	    Version 1.0 : For the release 1.0, raptor is linked to a Mysql database only. 
+	    	It can do those tasks :
+	            - Collect active scenarios and execute them if it's the time to do it.
+	
+			    - Extract one or more parts of a website (Using Jsoup library: http://jsoup.org/)
+		
+			    - Send email with the result of the last task (Using Javamail : http://www.oracle.com/technetwork/java/javamail/index.html)
+		
+			    - Translate the result given by the previous task
+		
+			    - Post articles on Wordpress ( Using Wordpress API : http://code.google.com/p/wordpress-java/)
+
+3) Licence
+
+	Raptor is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+ 
+    Raptor is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+ 
+    You should have received a copy of the GNU General Public License
+    along with Raptor.  If not, see <http://www.gnu.org/licenses/>
+
+4) How to install Raptor on your computer/server ?
+
+	A) To install Raptor you have to install Java first and a DB server (mysql for example) on your computer. 
+	B) Then create launch the script given is the folder /DBscript to create the database.
+	C) Edit the conf file in META-INF/robot.properties as you wish.
+	D) Prepare your scenario in your database (i will create a script soon to do this in command line/ please refer to the documentation of database in /DBscript/docDB.txt):
+		- Create a user in the table "user"
+		- Create your first scenario with the table "scenario" and use the id of your user as foreign key
+		- Create all your tasks (including (or not) tags and/or conditions)
+	E) Execute Raptor (use a cron task if possible)
+	
 That's all for the moment... (I will add more information about it with a full documentation and install process). 
 
+
 Please contact me if you want to join the project.
-Email: eric.pidoux@free.fr
+Email: contact@eric-pidoux.com
 Skype: eric.pidoux

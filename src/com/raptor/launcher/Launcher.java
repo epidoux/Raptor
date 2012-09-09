@@ -4,6 +4,7 @@ import java.util.List;
 import com.raptor.entities.core.Scenario;
 import com.raptor.entities.core.User;
 import com.raptor.factories.ConnectionFactory;
+import com.raptor.properties.Constants;
 import com.raptor.properties.Log;
 import com.raptor.services.orm.Connection;
 
@@ -34,7 +35,7 @@ public class Launcher {
 	public static void main(String[] args) {
 		
 		//Let's start Raptor!!!
-		Log.getInstance().info("Starting Raptor...");
+		Log.getInstance().info("Starting "+Constants.APP_NAME+" on version "+Constants.APP_VERSION+" developped by Eric PIDOUX");
 		try{
 			Connection con = ConnectionFactory.getInstance().getConnection();
 			//Retrieve all active users

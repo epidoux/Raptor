@@ -1,0 +1,90 @@
+DOCUMENTATION OF RAPTOR DATABASE
+
+1) TABLE "user":
+
+	This table is used to define users who can execute scenario
+	
+	Fields:
+	
+		- "id" : INT : auto-increment field
+		- "pass": VARCHAR : Password (not used in raptor but in raptorweb project)
+		- "active": INT : is the user active (0 or 1)
+		- "role" : VARCHAR : define the user role ("administrator","member")
+		- "email" : VARCHAR : define the user email (use by raptor to send your task sender email result
+		
+
+2) TABLE "scenario":
+
+	This table is used to define scenario which is linked to an user and have one or many task(s)
+	
+	Fields:
+	
+		- "id" : INT : auto-increment field
+		- "name": VARCHAR : name of your scenario
+		- "description": TEXT : description of the scenario 
+		- "date_creation" : DATE : define the date of creation
+		- "date_last_execution" : DATE : define the date of the last execution of your scenario
+		- "execution_min" : INT : define the number of minutes your scenario will be executed (example: 60 to execute it every hour)
+		- "active" : INT : define if the scenario is active (0 or 1)
+		- "userid" : INT : Foreign Key to the user table
+
+3) TABLE "task":
+
+	This table is used to define tasks which is linked to a scenario and have one or many tag(s) and/or condition(s)
+	
+	Fields:
+	
+		- "id" : INT : auto-increment field
+		- "name": VARCHAR : name of your task
+		- "description": TEXT : description of the task 
+		- "type" : VARCHAR : define what kind of task is it (CRAWL_HTML/SENDER_EMAIL/TRANSLATE_ARTICLES/SENDER_BLOG_WORDPRESS)
+		- "position" : INT : define the position of your task in your scenario (first CRAWL, then TRANSLATE, then SENDER)
+		- "input_content" : VARCHAR : define the content type of the data which is given by the previous task (HTML/List<Article>...)
+		- "output_content" : VARCHAR : define the content type of the data which is given to the next task (List<Article>/
+		- "scenarioid" : INT : Foreign Key to the scenario table
+		- "crawl_link" : TEXT : Option for CRAWL type task : define the liuk to crawl
+		- "crawl_multipages" : LONGTEXT : Option for CRAWL type task : define if there is a multipage system (the field must be filled with a css navigation to the next page button ex: .pagecontent #nextpage a[href]) example: a blog footer with <1,2,3,4> to switch pages)
+		- "crawl_multipageLimit" : INT : Option for CRAWL type task : define the max number of page that raptor will parse
+		- "crawl_readmore" : TEXT : Option for CRAWL type task : define if there is a readmore button on the page to access to the entire article (the field must be filled with a css navigation regex to the button ex: .pagecontent #readmore a[href])
+		- "sender_email_emails" : TEXT : Option for SENDER_EMAIL type task : define the emails to send the result (split character used is ,)
+		- "sender_email_object" : VARCHAR : Option for SENDER_EMAIL type task : define the object of the email
+		- "sender_email_content" : VARCHAR : Option for SENDER_EMAIL type task : define a fixed content before the result (put [content] to paste result here) 
+		- "sender_blog_link" : VARCHAR : Option for SENDER_BLOG : define the link of the blog 
+		- "sender_blog_login" : VARCHAR : Option for SENDER_BLOG : define the login of the blog 
+		- "sender_blog_pass" : VARCHAR : Option for SENDER_BLOG : define the pass of the blog 
+		- "sender_blog_email" : VARCHAR : Option for SENDER_BLOG : define the email of the blog user 
+		- "action_keep_original_content" : INT : Option for Action type task : define if the content before doing action must be saved and send to the next task 
+		- "sender_add_source" : INT : define if the source must be added (if it was a crawl)
+		- "action_translate_language_original" : VARCHAR : define the original language code (en/fr/...)
+		- "action_translate_language_needed" : VARCHAR : define the needed language code (en/fr/...)
+		
+
+
+4) TABLE "tag":
+
+	This table is used to define tags to help CRAWL_HTML task
+	
+	Fields:
+	
+		- "id" : INT : auto-increment field
+		- "type": VARCHAR : type of your tag (MOTHER (html tag containing an article) / TITLE (title tag) / DATE (date tag) / CONTENT (content tag))
+		- "name": VARCHAR : tag name (div, h2, p, ...) 
+		- "identifiant" : VARCHAR : regex of the attribute id of the tag (example : post-[0-9]*)
+		- "classe" : VARCHAR : define the class attribute of the tag
+		- "taskid" : INT : Foreign Key to the task table			
+		
+
+
+5) TABLE "condition":
+
+	This table is used to define conditions on task result content 
+	
+	Fields:
+	
+		- "id" : INT : auto-increment field
+		- "type": VARCHAR : type of your condition (HTML/STRING/INTEGER/DATE)
+		- "value": VARCHAR : value of your condition
+		- "positionType" : VARCHAR : position of the condition (url/body)
+		- "positionRegex" : VARCHAR : define the regex of the condition (ex: http://site.com/index.php?page=:pos:)
+		- "signe" : VARCHAR : define the math signe of the condition (=/>/</>=/<=)
+		- "taskid" : INT : Foreign Key to the task table		
