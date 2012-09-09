@@ -3,8 +3,6 @@ package com.raptor.entities.task;
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
 import java.util.Locale;
 
 import org.w3c.dom.Element;
@@ -15,9 +13,23 @@ import com.raptor.services.core.RssReaderService;
 
 /**
  * This class represents a task having a crawl on a RSS stream to do in a scenario
- * @author erik
- * @version 1.0
  * type = crawl_html
+ * @author Eric Pidoux
+ * @version 1.0
+ *  This file is part of Raptor.
+ *  Raptor is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  Raptor is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with Raptor.  If not, see <http://www.gnu.org/licenses/>
+ *
  */
 public class TaskCrawlRss extends TaskCrawl implements Serializable {
    /** Default value included to remove warning. Remove or modify at will. **/

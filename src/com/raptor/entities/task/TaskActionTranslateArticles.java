@@ -5,19 +5,31 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.raptor.entities.core.Article;
-import com.raptor.properties.Constants;
 import com.raptor.properties.Log;
 import com.raptor.properties.RobotProperties;
 import com.raptor.services.core.TranslatorService;
 
 /**
  * This class represents a task which is used to translate a list of articles from a language to another
- * @author erik
- * @version 1.0
  * type = translate_articles
- * 
  * input = List<Article>
  * output = List<Article>
+ * @author Eric Pidoux
+ * @version 1.0
+ *  This file is part of Raptor.
+ *  Raptor is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  Raptor is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with Raptor.  If not, see <http://www.gnu.org/licenses/>
+ *
  */
 public class TaskActionTranslateArticles extends TaskActionTranslate implements Serializable {
    
